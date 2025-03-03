@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio de Sesión</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        /* Encabezado */
+        header {
+            background-color: #007bff;
+            color: white;
+            padding: 15px;
+            font-size: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #clock {
+            font-size: 16px;
+        }
+        /* Contenido principal */
+        main {
+            padding: 50px;
+        }
+        #loginForm, #buttons, #infoBox {
+            display: none;
+        }
+        .button {
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        /* Mensaje dinámico */
+        #infoBox {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            font-size: 18px;
+        }
+        /* Pie de página */
+        footer {
+            background-color: #007bff;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Encabezado -->
+    <header>
+        <div><strong>Dabeiba Por Tu Salud</strong></div>
+        <div id="clock"></div>
+    </header>
+
+    <!-- Contenido principal -->
+    <main>
+        <h2 id="welcomeMessage">¡Bienvenido! Pulsa el botón para iniciar sesión.</h2>
+        <button id="startLogin" class="button">Iniciar Sesión</button>
+
+        <div id="loginForm">
+            <h3>Ingrese sus credenciales</h3>
+            <input type="text" id="username" placeholder="Usuario"><br><br>
+            <input type="password" id="password" placeholder="Contraseña"><br><br>
+            <button onclick="validateLogin()" class="button">Ingresar</button>
+        </div>
+
+        <div id="buttons">
+            <h3>¡Bienvenido! A Dabeiba Por Tu Salud:</h3>
+            <button class="button" onclick="showInfo('agendar')">Agendar Cita Médica</button>
+            <button class="button" onclick="showInfo('consultar')">Consultar Cita Médica</button>
+            <button class="button" onclick="showInfo('contactos')">Contactos</button>
+
+            <!-- Mensaje dinámico -->
+            <div id="infoBox"></div>
+        </div>
+    </main>
+
+    <!-- Pie de página -->
+    <footer>
+        &copy; 2024 Dabeiba Por Tu Salud | Todos los derechos reservados Por Arley Torres Ingeniero
+    </footer>
+
+    <script>
+        // Mostrar reloj en tiempo real
+        function updateClock() {
+            let now = new Date();
+            let options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            let dateStr = now.toLocaleDateString('es-ES', options);
+            let timeStr = now.toLocaleTimeString('es-ES');
+            document.getElementById("clock").innerHTML = `${dateStr} - ${timeStr}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Mostrar formulario de inicio de sesión
+        document.getElementById("startLogin").addEventListener("click", function() {
+            document.getElementById("welcomeMessage").style.display = "none";
+            document.getElementById("startLogin").style.display = "none";
+            document.getElementById("loginForm").style.display = "block";
+        });
+
+        // Validación de login
+        function validateLogin() {
+            var username = document.getElementById("username").value;
+            var password = document.getElementById("password").value;
+
+            fetch("/auth/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: `usuario=${username}&contraseña=${password}`
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.text();
+                } else {
+                    throw new Error("Usuario o contraseña incorrectos");
+                }
+            })
+            .then(data => {
+                alert(data);
+                document.getElementById("loginForm").style.display = "none";
+                document.getElementById("buttons").style.display = "block";
+                document.getElementById("infoBox").style.display = "block"; // Mostrar cuadro de info
+            })
+            .catch(error => {
+                alert(error.message);
+            });
+        }
+
+        // Mostrar información según la opción seleccionada
+        function showInfo(option) {
+            let infoBox = document.getElementById("infoBox");
+            if (!infoBox.style.display) {
+                infoBox.style.display = "block";
+            }
+
+            switch (option) {
+                case 'agendar':
+                    infoBox.innerHTML = "<strong>Agendar Cita Médica:</strong><br> Puede seleccionar una fecha y especialidad para su cita médica.";
+                    break;
+                case 'consultar':
+                    infoBox.innerHTML = "<strong>Consultar Cita Médica:</strong><br> Verifique la fecha, hora y estado de sus citas médicas.";
+                    break;
+                case 'contactos':
+                    infoBox.innerHTML = "<strong>Contactos:</strong><br> Comuníquese con nosotros a través de nuestra línea de atención.";
+                    break;
+                default:
+                    infoBox.innerHTML = "";
+            }
+        }
+    </script>
+
+</body>
+</html>
